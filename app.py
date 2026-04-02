@@ -16,7 +16,15 @@ def load_ml_assets():
     model = load_model('lstm_greenhouse_model.h5', compile=False)
     sc_x = joblib.load('scaler_x.pkl')
     sc_y = joblib.load('scaler_y.pkl')
+        # Temporary debug line to see the feature names
+    if hasattr(scaler_x, "feature_names_in_"):
+        st.write("### 📋 Features your model expects:")
+        st.write(scaler_x.feature_names_in_)
+    else:
+        st.write("Scaler doesn't have names, but it wants 10 values.")
     return model, sc_x, sc_y
+
+
 
 try:
     lstm_model, scaler_x, scaler_y = load_ml_assets()

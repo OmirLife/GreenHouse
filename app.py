@@ -8,7 +8,7 @@ from tensorflow.keras.models import load_model
 st.set_page_config(page_title="AgroTech Greenhouse Predictor", page_icon="🌿")
 
 st.title("🌿 Greenhouse Climate Predictor")
-st.info("Master's Thesis: ML for Greenhouse Parameter Prediction (LSTM Model)")
+st.info("ML for Greenhouse Parameter Prediction (LSTM Model)")
 
 # Load model and scalers
 @st.cache_resource
@@ -40,6 +40,9 @@ with col2:
     feat6 = st.number_input("Feature 6", value=0.0)
     feat7 = st.number_input("Feature 7", value=0.0)
     feat8 = st.number_input("Feature 8", value=0.0)
+
+# Add this temporary line right before the line that causes the error:
+st.write(f"DEBUG: Scaler expects {scaler_x.n_features_in_} features.")
 
 if st.button("Generate 1-Minute Prediction"):
     # LSTM needs a sequence of 10. We'll duplicate the current state 

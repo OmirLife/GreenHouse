@@ -32,17 +32,16 @@ st.subheader("Current Sensor Readings")
 col1, col2 = st.columns(2)
 
 with col1:
-    temp = st.number_input("Air Temperature (°C)", value=22.0)
-    hum = st.number_input("Humidity (%)", value=50.0)
-    light = st.number_input("Light Level (Lux)", value=300.0)
-    ext_temp = st.number_input("External Temp (°C)", value=15.0)
+    ec = st.number_input("EC (Electrical Conductivity)", value=1.5)
+    tds = st.number_input("TDS (Total Dissolved Solids)", value=700.0)
+    turbidity = st.number_input("Turbidity", value=5.0)
+    light_level = st.number_input("Light Level (Lux)", value=300.0)
 
 with col2:
     # Adding placeholders for the other 4 features to reach your 8-feature count
-    feat5 = st.number_input("Feature 5", value=0.0)
-    feat6 = st.number_input("Feature 6", value=0.0)
-    feat7 = st.number_input("Feature 7", value=0.0)
-    feat8 = st.number_input("Feature 8", value=0.0)
+    curr_temp = st.number_input("Current Air Temp (°C)", value=22.0)
+    curr_hum = st.number_input("Current Humidity (%)", value=50.0)
+    curr_co2 = st.number_input("Current CO2 (ppm)", value=400.0)
 
 # Add this temporary line right before the line that causes the error:
 st.write(f"DEBUG: Scaler expects {scaler_x.n_features_in_} features.")
@@ -55,19 +54,49 @@ else:
 if st.button("Generate 1-Minute Prediction"):
     # LSTM needs a sequence of 10. We'll duplicate the current state 
     # to simulate a stable greenhouse for this demo.
-    input_row = [temp, hum, light, ext_temp, feat5, feat6, feat7, feat8]
-    sequence = np.tile(input_row, (10, 1)) 
-    
-    # Scaling and Prediction
+    input_row = [
+        ec,              # 1. ec
+        tds,             # 2. tds
+        turbidity,       # 3. turbidity
+        light_level,     # 4. light_level
+        curr_temp,       # 5. air_temperature_lag1
+        curr_temp,       # 6. air_temperature_lag5
+        curr_hum,        # 7. air_humidity_lag1
+        curr_hum,        # 8. air_humidity_lag5
+        curr_co2,        # 9. co2_lag1
+        curr_co2         # 10. co2_lag5
+    ]
+    # Verify the count one last time
+    if len(input_row) == 10:
+        # Create sequence for LSTM (10 time steps)
+        sequence = np.tile(input_row, (10, 1))
+        
+    # Scale and Predict
     scaled_seq = scaler_x.transform(sequence)
     input_ready = np.expand_dims(scaled_seq, axis=0)
-    
+        
     pred_scaled = lstm_model.predict(input_ready)
     prediction = scaler_y.inverse_transform(pred_scaled)
-    
-    # Display Results
+        
+        # Display Results
     st.divider()
     res_col1, res_col2, res_col3 = st.columns(3)
     res_col1.metric("Predicted Temp", f"{prediction[0][0]:.2f} °C")
     res_col2.metric("Predicted Humidity", f"{prediction[0][1]:.2f} %")
     res_col3.metric("Predicted CO2", f"{prediction[0][2]:.2f} ppm")
+else:
+    st.error("Feature count mismatch! Check the input_row logic.")
+    
+    # Scaling and Prediction
+scaled_seq = scaler_x.transform(sequence)
+input_ready = np.expand_dims(scaled_seq, axis=0)
+    
+pred_scaled = lstm_model.predict(input_ready)
+prediction = scaler_y.inverse_transform(pred_scaled)
+    
+    # Display Results
+st.divider()
+res_col1, res_col2, res_col3 = st.columns(3)
+res_col1.metric("Predicted Temp", f"{prediction[0][0]:.2f} °C")
+res_col2.metric("Predicted Humidity", f"{prediction[0][1]:.2f} %")
+res_col3.metric("Predicted CO2", f"{prediction[0][2]:.2f} ppm")

@@ -46,9 +46,9 @@ with col2:
 
 # Add this temporary line right before the line that causes the error:
 st.write(f"DEBUG: Scaler expects {scaler_x.n_features_in_} features.")
-if hasattr(sc_x, "feature_names_in_"):
+if hasattr(scaler_x, "feature_names_in_"):
     st.write("### 📋 Features your model expects:")
-    st.write(sc_x.feature_names_in_)
+    st.write(scaler_x.feature_names_in_)
 else:
     st.write("Scaler doesn't have names, but it wants 10 values.")
         

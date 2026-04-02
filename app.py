@@ -17,11 +17,6 @@ def load_ml_assets():
     sc_x = joblib.load('scaler_x.pkl')
     sc_y = joblib.load('scaler_y.pkl')
         # Temporary debug line to see the feature names
-    if hasattr(scaler_x, "feature_names_in_"):
-        st.write("### 📋 Features your model expects:")
-        st.write(scaler_x.feature_names_in_)
-    else:
-        st.write("Scaler doesn't have names, but it wants 10 values.")
     return model, sc_x, sc_y
 
 
@@ -51,7 +46,12 @@ with col2:
 
 # Add this temporary line right before the line that causes the error:
 st.write(f"DEBUG: Scaler expects {scaler_x.n_features_in_} features.")
-
+if hasattr(sc_x, "feature_names_in_"):
+        st.write("### 📋 Features your model expects:")
+        st.write(sc_x.feature_names_in_)
+    else:
+        st.write("Scaler doesn't have names, but it wants 10 values.")
+        
 if st.button("Generate 1-Minute Prediction"):
     # LSTM needs a sequence of 10. We'll duplicate the current state 
     # to simulate a stable greenhouse for this demo.

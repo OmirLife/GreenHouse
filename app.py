@@ -13,7 +13,7 @@ st.info("Master's Thesis: ML for Greenhouse Parameter Prediction (LSTM Model)")
 # Load model and scalers
 @st.cache_resource
 def load_ml_assets():
-    model = load_model('lstm_greenhouse_model.h5')
+    model = load_model('lstm_greenhouse_model.h5', , compile=False)
     sc_x = joblib.load('scaler_x.pkl')
     sc_y = joblib.load('scaler_y.pkl')
     return model, sc_x, sc_y

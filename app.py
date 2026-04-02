@@ -51,9 +51,12 @@ if hasattr(scaler_x, "feature_names_in_"):
 else:
     st.write("Scaler doesn't have names, but it wants 10 values.")
         
+    
 if st.button("Generate 1-Minute Prediction"):
-    # LSTM needs a sequence of 10. We'll duplicate the current state 
-    # to simulate a stable greenhouse for this demo.
+    # THE CRITICAL STEP: Mapping the sliders to the 10 features in order
+    # Order from your image: ec, tds, turbidity, light_level, 
+    # air_temp_lag1, air_temp_lag5, hum_lag1, hum_lag5, co2_lag1, co2_lag5
+    
     input_row = [
         ec,              # 1. ec
         tds,             # 2. tds
@@ -66,37 +69,24 @@ if st.button("Generate 1-Minute Prediction"):
         curr_co2,        # 9. co2_lag1
         curr_co2         # 10. co2_lag5
     ]
+    
     # Verify the count one last time
     if len(input_row) == 10:
         # Create sequence for LSTM (10 time steps)
-        sequence = np.tile(input_row, (10, 1))
+        sequence = np.tile(input_row, (10, 1)) 
         
-    # Scale and Predict
-    scaled_seq = scaler_x.transform(sequence)
-    input_ready = np.expand_dims(scaled_seq, axis=0)
+        # Scale and Predict
+        scaled_seq = scaler_x.transform(sequence)
+        input_ready = np.expand_dims(scaled_seq, axis=0)
         
-    pred_scaled = lstm_model.predict(input_ready)
-    prediction = scaler_y.inverse_transform(pred_scaled)
+        pred_scaled = lstm_model.predict(input_ready)
+        prediction = scaler_y.inverse_transform(pred_scaled)
         
         # Display Results
-    st.divider()
-    res_col1, res_col2, res_col3 = st.columns(3)
-    res_col1.metric("Predicted Temp", f"{prediction[0][0]:.2f} °C")
-    res_col2.metric("Predicted Humidity", f"{prediction[0][1]:.2f} %")
-    res_col3.metric("Predicted CO2", f"{prediction[0][2]:.2f} ppm")
-else:
-    st.error("Feature count mismatch! Check the input_row logic.")
-    
-    # Scaling and Prediction
-scaled_seq = scaler_x.transform(sequence)
-input_ready = np.expand_dims(scaled_seq, axis=0)
-    
-pred_scaled = lstm_model.predict(input_ready)
-prediction = scaler_y.inverse_transform(pred_scaled)
-    
-    # Display Results
-st.divider()
-res_col1, res_col2, res_col3 = st.columns(3)
-res_col1.metric("Predicted Temp", f"{prediction[0][0]:.2f} °C")
-res_col2.metric("Predicted Humidity", f"{prediction[0][1]:.2f} %")
-res_col3.metric("Predicted CO2", f"{prediction[0][2]:.2f} ppm")
+        st.divider()
+        res_col1, res_col2, res_col3 = st.columns(3)
+        res_col1.metric("Predicted Temp", f"{prediction[0][0]:.2f} °C")
+        res_col2.metric("Predicted Humidity", f"{prediction[0][1]:.2f} %")
+        res_col3.metric("Predicted CO2", f"{prediction[0][2]:.2f} ppm")
+    else:
+        st.error("Feature count mismatch! Check the input_row logic.")
